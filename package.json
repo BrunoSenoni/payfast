@@ -1,12 +1,12 @@
 {
   "name": "payfast",
   "version": "1.0.0",
-  "description": "",
+  "description": "um gateway para pagamento através de recursos http",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "BrunoSenoni",
   "license": "ISC",
   "dependencies": {
     "consign": "^0.1.6",
