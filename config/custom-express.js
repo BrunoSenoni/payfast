@@ -10,6 +10,7 @@ var expressValidator = require('express-validator');
 module.exports = function() {
     //Armazena de fato o objeto do express
     var app = express();
+    //injeção dos middlewares(.use)
     app.use(bodyParser.urlencoded({extended: true}));
     //o app agora é capaz de realizar o parse do corpo de uma requisição
     app.use(bodyParser.json());
