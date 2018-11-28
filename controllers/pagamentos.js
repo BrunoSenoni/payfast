@@ -84,11 +84,28 @@ module.exports = function(app){
                 console.log("Erro ao inserir no banco" + erro);
                 res.status(500).send(erro);
             }else{
+            pagamento.id = resultado.insertId;
            console.log('pagamento criado');
            //InsertID é uma função do módulo do MYSQL, ou seja, quando for criado um novo pagamento será criada uma url com o id desse pagamento
-           res.location('/pagamentos/pagamento/' + resultado.insertId);
+           res.location('/pagamentos/pagamento/' + pagamento.id);
+           var response = {
+               dados_do_pagamento: pagamento,
+               links: [
+                   {
+                       href:"http://localhost:3000/pagamentos/pagamento" + pagamento.id, 
+                       rel:"confirmar",
+                       method:"PUT"
+                   },
+                   {
+                   href:"http://localhost:3000/pagamentos/pagamento" + pagamento.id,
+                   rel:"cancelar",
+                   method: "DELETE"
+                }
+               ]
+
+           }
            //201 é status code de created, ou seja, mostrar na response o código correto no caso
-           res.status(201).json(pagamento);
+           res.status(201).json(response);
         }
         });
 
