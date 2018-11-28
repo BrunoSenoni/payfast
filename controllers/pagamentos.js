@@ -13,11 +13,12 @@ module.exports = function(app){
         //O campo valor não pode ser vazio e deve ser decimal
         req.assert("valor", "Valor é obrigatório e deve ser decimal").notEmpty().isFloat();
 
-        var erros = req.validationErros();
+        var erros = req.validationErrors();
 
         if(erros){
             console.log("erros de validacao encontrados");
             res.status(400).send(erros);
+            return;
         }
 
     //corpo da requisição
@@ -33,10 +34,13 @@ module.exports = function(app){
         pagamentoDao.salva(pagamento, function(erro, resultado){
             if(erro){
                 console.log("Erro ao inserir no banco" + erro);
-                res.status(400).send(erro);
+                res.status(500).send(erro);
             }else{
            console.log('pagamento criado');
-           res.json(pagamento);
+           //InsertID é uma função do módulo do MYSQL, ou seja, quando for criado um novo pagamento será criada uma url com o id desse pagamento
+           res.location('/pagamentos/pagamento/' + resultado.insertId);
+           //201 é status code de created, ou seja, mostrar na response o código correto no caso
+           res.status(201).json(pagamento);
         }
         });
 
