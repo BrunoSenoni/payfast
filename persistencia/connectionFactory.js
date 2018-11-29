@@ -4,10 +4,18 @@ function createDBConnection(){
     return mysql.createConnection({
       host:'localhost',
       user: 'root',
-      password: '',
+      password: 'teste',
       database: 'payfast'
     });
 }
+var connection = createDBConnection();
+connection.connect(function(err){
+if(err){
+    return console.error('erro' + err.message);
+}
+    console.log('Connected to the MySQL server');
+});
+
 
 module.exports = function(){
     return createDBConnection;
