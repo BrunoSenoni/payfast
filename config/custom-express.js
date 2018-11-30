@@ -21,6 +21,7 @@ module.exports = function() {
     //Agora o consign informa ao express que deve fazer um scan de todos os arquivos dentro da pasta controllers e persistencia, carregá-los para dentro do seu objeto
     .include('controllers')
     .then('persistencia')
+    .then('servicos')
     .into(app);
     
     return app;

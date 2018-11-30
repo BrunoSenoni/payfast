@@ -3,6 +3,7 @@ module.exports = function(app){
     app.get("/pagamentos", function(req, res){
         
            res.send("ok");
+           console.log(res);
     }); 
     /*
         Estilo arquitetural REST: verbo +    recurso = operacao REST
@@ -12,15 +13,16 @@ module.exports = function(app){
                                   hypermidia
                                   hyperlinks
     */
-    app.delete('pagamentos/pagamento/:id', function(req,res){
+   //Altera status do pagamento para cancelado
+    app.delete('/pagamentos/pagamento/:id', function(req,res){
          var pagamento = {};
          var id = req.params.id;
 
          pagamento.id = id;
-         pagamento.status = 'cancelado';
+         pagamento.status = 'Cancelado';
 
          var connection = app.persistencia.connectionFactory();
-         var pagamentoDao = new app.persistencia.pagamentoDao(connection);
+         var pagamentoDao = new app.persistencia.PagamentoDao(connection);
 
          pagamentoDao.atualiza(pagamento, function(erro){
              if(erro){
@@ -28,21 +30,22 @@ module.exports = function(app){
                  return;
              }
              console.log("pagamento cancelado");
+             //.status é o status code do HTTP
              res.status(204).send(pagamento);
          });
     });
-//Confirmar pagamento 
-    app.put('pagamentos/pagamento/:id', function(req,res){
+//Altera status do pagamento para confirmado
+    app.put('/pagamentos/pagamento/:id', function(req,res){
         var pagamento = {}; 
         var id = req.params.id;
 
         pagamento.id = id;
-        pagamento.status = 'confirmado';
+        pagamento.status = 'Confirmado';
         
         var connection = app.persistencia.connectionFactory();
         var pagamentoDao = new app.persistencia.PagamentoDao(connection);
 
-        pagamentoDao.atualiza(pagamento, function(){
+        pagamentoDao.atualiza(pagamento, function(erro){
                if(erro){
                    res.status(500).send(erro);
                    return;
@@ -57,12 +60,12 @@ module.exports = function(app){
     app.post('/pagamentos/pagamento', function(req, res){
         //.assert é um validator do express. Serve para validação, filtragem e tratamento de dados 
         //O campo forma_de_pagamento não pode ser vazio
-        req.assert("forma_de_pagamento", "Forma de pagamento é obrigatório").notEmpty();
+        req.assert("pagamento.forma_de_pagamento", "Forma de pagamento é obrigatório").notEmpty();
         //O campo valor não pode ser vazio e deve ser decimal
-        req.assert("valor", "Valor é obrigatório e deve ser decimal").notEmpty().isFloat();
+        req.assert("pagamento.valor", "Valor é obrigatório e deve ser decimal").notEmpty().isFloat();
 
         var erros = req.validationErrors();
-
+        //Caso tiver erro de acordo com as validações dos asserts acima, irá retornar um response com o erro e o status code 400(bad request)
         if(erros){
             console.log("erros de validacao encontrados");
             res.status(400).send(erros);
@@ -70,7 +73,8 @@ module.exports = function(app){
         }
 
     //corpo da requisição
-        var pagamento = req.body;
+    //Como agora o Json enviado no corpo da requisição possui duas chaves "pagamento" e "cartao", nós temos que especificar qual chave que queremos["pagamento"]
+        var pagamento = req.body["pagamento"];
         console.log('processando uma requisição de um novo pagamento');
 
         pagamento.status = "Criado";
@@ -84,31 +88,49 @@ module.exports = function(app){
                 console.log("Erro ao inserir no banco" + erro);
                 res.status(500).send(erro);
             }else{
+           //InsertID é uma função do módulo do MYSQL, ou seja, quando for criado um novo pagamento será criada uma url com o id desse pagamento
            pagamento.id = resultado.insertId;
            console.log('pagamento criado');
-           //InsertID é uma função do módulo do MYSQL, ou seja, quando for criado um novo pagamento será criada uma url com o id desse pagamento
+
+           if(pagamento.forma_de_pagamento == 'cartao'){
+               var cartao = req.body["cartao"];
+               console.log(cartao);
+
+              var clienteCartoes = new app.servicos.clienteCartoes();
+              clienteCartoes.autoriza(cartao, 
+                function(exception, request, response, retorno){
+                    console.log(retorno);
+                    res.status(201).json(retorno);
+                    return;
+
+              });
+
+               
+           }else{
+           
            res.location('/pagamentos/pagamento/' + pagamento.id);
-           var response = {
-               dados_do_pagamento: pagamento,
-               links: [
-                   {
-                       href:"http://localhost:3000/pagamentos/pagamento" + pagamento.id, 
-                       rel:"confirmar",
-                       method:"PUT"
-                   },
-                   {
-                   href:"http://localhost:3000/pagamentos/pagamento" + pagamento.id,
-                   rel:"cancelar",
-                   method: "DELETE"
-                }
+            var response = {
+                dados_do_pagamento: pagamento,
+                links: [
+                    {
+                        href:"http://localhost:3000/pagamentos/pagamento" + pagamento.id, 
+                        rel:"confirmar",
+                        method:"PUT"
+                    },
+                    {
+                    href:"http://localhost:3000/pagamentos/pagamento" + pagamento.id,
+                    rel:"cancelar",
+                    method: "DELETE"
+                    }
                ]
 
            }
            //201 é status code de created, ou seja, mostrar na response o código correto no caso
            res.status(201).json(response);
+          }
         }
         });
 
-        
+    
     });
 }
