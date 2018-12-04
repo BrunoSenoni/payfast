@@ -22,6 +22,7 @@ module.exports = function() {
     .include('controllers')
     .then('persistencia')
     .then('servicos')
+    .then()
     .into(app);
     
     return app;
