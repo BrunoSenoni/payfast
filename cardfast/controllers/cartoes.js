@@ -19,6 +19,7 @@ module.exports = function(app) {
         return;
       }
       cartao.status = 'AUTORIZADO';
+      console.log("autorizado");
 
       var response = {
         dados_do_cartao: cartao,

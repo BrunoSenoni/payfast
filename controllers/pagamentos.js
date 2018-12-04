@@ -17,7 +17,7 @@ module.exports = function(app){
     app.delete('/pagamentos/pagamento/:id', function(req,res){
          var pagamento = {};
          var id = req.params.id;
-
+         
          pagamento.id = id;
          pagamento.status = 'Cancelado';
 
@@ -99,8 +99,35 @@ module.exports = function(app){
               var clienteCartoes = new app.servicos.clienteCartoes();
               clienteCartoes.autoriza(cartao, 
                 function(exception, request, response, retorno){
+                    //se tiver um erro
+                    if(exception){
+                        console.log(exception);
+
+                        res.status(400).send(exception);
+                        return;
+
+                    }
                     console.log(retorno);
-                    res.status(201).json(retorno);
+
+                    res.location('/pagamentos/pagamento/' + pagamento.id);
+                    var response = {
+                        dados_do_pagamento: pagamento,
+                        carta: retorno,
+                        links: [
+                            {
+                                href:"http://localhost:3000/pagamentos/pagamento" + pagamento.id, 
+                                rel:"confirmar",
+                                method:"PUT"
+                            },
+                            {
+                            href:"http://localhost:3000/pagamentos/pagamento" + pagamento.id,
+                            rel:"cancelar",
+                            method: "DELETE"
+                            }
+                       ]
+        
+                   }
+                    res.status(201).json(response);
                     return;
 
               });
@@ -111,6 +138,7 @@ module.exports = function(app){
            res.location('/pagamentos/pagamento/' + pagamento.id);
             var response = {
                 dados_do_pagamento: pagamento,
+                carta: retorno,
                 links: [
                     {
                         href:"http://localhost:3000/pagamentos/pagamento" + pagamento.id, 
@@ -127,6 +155,7 @@ module.exports = function(app){
            }
            //201 é status code de created, ou seja, mostrar na response o código correto no caso
            res.status(201).json(response);
+           return;
           }
         }
         });
