@@ -112,15 +112,15 @@ module.exports = function(app){
                     res.location('/pagamentos/pagamento/' + pagamento.id);
                     var response = {
                         dados_do_pagamento: pagamento,
-                        carta: retorno,
+                        cartao: retorno,
                         links: [
                             {
-                                href:"http://localhost:3000/pagamentos/pagamento" + pagamento.id, 
+                                href:"http://localhost:3000/pagamentos/pagamento/" + pagamento.id, 
                                 rel:"confirmar",
                                 method:"PUT"
                             },
                             {
-                            href:"http://localhost:3000/pagamentos/pagamento" + pagamento.id,
+                            href:"http://localhost:3000/pagamentos/pagamento/" + pagamento.id,
                             rel:"cancelar",
                             method: "DELETE"
                             }
@@ -138,15 +138,14 @@ module.exports = function(app){
            res.location('/pagamentos/pagamento/' + pagamento.id);
             var response = {
                 dados_do_pagamento: pagamento,
-                carta: retorno,
                 links: [
                     {
-                        href:"http://localhost:3000/pagamentos/pagamento" + pagamento.id, 
+                        href:"http://localhost:3000/pagamentos/pagamento/" + pagamento.id, 
                         rel:"confirmar",
                         method:"PUT"
                     },
                     {
-                    href:"http://localhost:3000/pagamentos/pagamento" + pagamento.id,
+                    href:"http://localhost:3000/pagamentos/pagamento/" + pagamento.id,
                     rel:"cancelar",
                     method: "DELETE"
                     }
