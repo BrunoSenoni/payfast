@@ -1,3 +1,6 @@
+//incluio o arquivo de logger
+var logger = require('../servicos/logger.js');
+
 //Atende uma requisição na url /pagamentos a partir de uma chamada com o método GET(HTTP)
 module.exports = function(app){
     app.get("/pagamentos", function(req, res){
@@ -18,6 +21,8 @@ module.exports = function(app){
     app.get('/pagamentos/pagamento/:id', function(req,res){
         var id = req.params.id;
         console.log("Consultado pagamento" + id);
+        //Esse logger irá gerar esse log na pasta logs(conforme configurado na pasta logger.js)
+        logger.info("consultando pagamento " + id);
         var connection = app.persistencia.connectionFactory();
         var pagamentoDao = new app.persistencia.PagamentoDao(connection);
         pagamentoDao.buscaPorId(id, function(erro, resultado){

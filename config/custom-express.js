@@ -6,11 +6,26 @@ var consign = require('consign');
 var bodyParser = require('body-parser');
 //Validação de dados
 var expressValidator = require('express-validator');
+//Pacote para escrever logs com express
+var morgan = require('morgan');
+var logger = require('../servicos/logger.js');
 
 module.exports = function() {
     //Armazena de fato o objeto do express
     var app = express();
+
+
     //injeção dos middlewares(.use)
+    //padrão common
+    app.use(morgan("common", {
+        //Isso faz com que não pare a execução da aplicação só para escrever um log, ou seja, o stream abre um pipe na execução do request
+        stream: {
+          write: function(mensagem){
+              //o winston é encarregado de escrever a msg no arquivo e o morgan intercepta a requisição do express e abre um filtro para escrever a msg
+              logger.info(mensagem);
+          }   
+        }
+    }));
     app.use(bodyParser.urlencoded({extended: true}));
     //o app agora é capaz de realizar o parse do corpo de uma requisição
     app.use(bodyParser.json());
